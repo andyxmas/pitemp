@@ -17,17 +17,17 @@ def get_temp():
     matches = re.search("Temp =\s+([0-9.]+)", output)
     if (not matches):
         time.sleep(3)
-        continue
+        return "error"
     temp = float(matches.group(1))
 
     # Humidity
     matches = re.search("Hum =\s+([0-9.]+)", output)
     if (not matches):
         time.sleep(3)
-        continue
+        return "ERROR"
     humidity = float(matches.group(1))
 
-    return {'temp': temp, 'humidity': humidity}
+    return (temp, humidity)
 
 
 def get_external_temp():
@@ -48,4 +48,4 @@ def get_external_temp():
 
 
 print "external temp: %s, internal temp: %s, humidity: %s." % (
-    get_external_temp(), get_temp['temp'], get_temp['humidity'])
+    get_external_temp(), get_temp()[0], get_temp()[1])
