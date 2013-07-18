@@ -83,5 +83,5 @@ def write_to_gdocs(temp, humidity, ext_temp):
         print "Unable to append data.  Check your connection?"
 
 write_to_gdocs(get_external_temp(),
-               get_temp['temp'],
-               get_temp['humidity'])
+               get_temp()[0],
+               get_temp()[1])
