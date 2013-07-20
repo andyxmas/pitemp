@@ -47,5 +47,41 @@ def get_external_temp():
         return "error getting data"
 
 
-print "external temp: %s, internal temp: %s, humidity: %s." % (
-    get_external_temp(), get_temp()[0], get_temp()[1])
+def write_to_gdocs(temp, humidity, ext_temp):
+    '''write our data to a google spreadsheet'''
+    # Account details for google docs
+    email = 'andy.christmas@gmail.com'
+    password = 'oknifzuxspiwyobt'
+    spreadsheet = 'pitemp'
+
+    # Login with your Google account
+    try:
+        gc = gspread.login(email, password)
+    except:
+        print "Unable to log in.  Check your email address/password"
+        sys.exit()
+
+    # Open a worksheet from your spreadsheet using the filename
+    try:
+        worksheet = gc.open(spreadsheet).sheet1
+    except:
+        print "Unable to open the spreadsheet. \
+        Check your filename: %s" % spreadsheet
+        sys.exit()
+
+    try:
+        values = [datetime.datetime.now(),
+                  temp,
+                  humidity,
+                  ext_temp]
+        worksheet.append_row(values)
+
+        #success!
+        print "Wrote a row to %s at %s" % (spreadsheet,
+                                           datetime.datetime.now())
+    except:
+        print "Unable to append data.  Check your connection?"
+
+write_to_gdocs(get_external_temp(),
+               get_temp()[0],
+               get_temp()[1])
