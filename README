@@ -3,10 +3,7 @@ This is a project to record temperature using the raspberry pi.
 Initially based on this tutorial: 
 http://learn.adafruit.com/dht-humidity-sensing-on-raspberry-pi-with-gdocs-logging/overview
 
-Who knows where it will end up...!?
-
-I added this in test2. not sure who i will merge it with the changes in test1?
-
-n.b. just doing a little bit of learning about branching about git.
-this change to the readme was done to branch test1.
-come back to this after a while and 'finished' my changes to README.
+20/7/2013: managed to get this working over cron now.
+ - changed the ref to Adafruit_DHC to be absolute (the path is specific to my pi now though)
+ - did chmod to make ptimep executable
+ - added in a entry to /etc/crontab to ping pitemp.py every hour
