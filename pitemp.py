@@ -11,52 +11,41 @@ import xml.etree.ElementTree as ET
 
 
 def get_temp():
-    '''Get the temperature and humidity readings from the DHT22'''
-    # Temp
-    output = subprocess.check_output(
-        ["/home/andy/python/bitbucket/pitemp/Adafruit_DHT", "2302", "4"])
-    matches = re.search("Temp =\s+([0-9.]+)", output)
-    if (not matches):
-        error_internal = "Error getting data from DHT22"
-        temp = ""
-    else:
-        temp = float(matches.group(1))
-        error_internal = "OK"
+    """Get the temperature and humidity readings from the DHT22"""
+    count = 0
+    while True:
+        # Temp
+        output = subprocess.check_output(
+            ["/home/andy/python/bitbucket/pitemp/Adafruit_DHT", "2302", "4"])
+        count += 1
+        print ("Attempt %s: %s") % (count, output)
+        temp_match = re.search("Temp =\s+([0-9.]+)", output)
+        humid_match = re.search("Hum =\s+([0-9.]+)", output)
 
-    # Humidity
-    matches = re.search("Hum =\s+([0-9.]+)", output)
-    if (not matches):
-        error_internal = "Error getting data from DHT22"
-        humidity = ""
-    else:
-        humidity = float(matches.group(1))
-        error_internal = "OK"
+        # if the beginning of output contains temp and numbers,
+        # we can assume we are getting valid data
+        if temp_match:
+            temp = float(temp_match.group(1))
+            humidity = float(humid_match.group(1))
+            break
 
-    return (temp, humidity, error_internal)
+    return (temp, humidity)
 
 
 def get_external_temp():
-    '''using openweathermap, get the tempertare at time of call'''
+    """using openweathermap, get the tempertare at time of call"""
     baseurl = "http://api.openweathermap.org/data/2.5/weather"
     query = "?q=salhouse&mode=xml"
     url = baseurl + query
-    try:
-        r = requests.get(url)
-        root = ET.fromstring(r.text)
-        kelvin = float(root[1].attrib.get('value'))
-        celcius = kelvin - 272.15
-        error_external = "OK"
-
-    except:
-        print "had trouble gettin the temp from open weather map..."
-        celcius = ""
-        error_external = "error getting external temp"
-
-    return celcius, error_external
+    r = requests.get(url)
+    root = ET.fromstring(r.text)
+    kelvin = float(root[1].attrib.get('value'))
+    celcius = kelvin - 272.15
+    return celcius
 
 
-def write_to_gdocs(temp, humidity, ext_temp, err_int, err_ext):
-    '''write our data to a google spreadsheet'''
+def write_to_gdocs(temp, ext_temp, humidity):
+    """write our data to a google spreadsheet"""
     # Account details for google docs
     email = 'andy.christmas@gmail.com'
     password = 'oknifzuxspiwyobt'
@@ -80,10 +69,8 @@ def write_to_gdocs(temp, humidity, ext_temp, err_int, err_ext):
     try:
         values = [datetime.datetime.now(),
                   temp,
-                  humidity,
                   ext_temp,
-                  err_int,
-                  err_ext]
+                  humidity]
         worksheet.append_row(values)
 
         #success!
@@ -92,9 +79,7 @@ def write_to_gdocs(temp, humidity, ext_temp, err_int, err_ext):
     except:
         print "Unable to append data.  Check your connection?"
 
-write_to_gdocs(get_external_temp()[0],
-               get_temp()[0],
-               get_temp()[1],
-               get_temp()[2],
-               get_external_temp()[1]
+write_to_gdocs(get_temp()[0],
+               get_external_temp(),
+               get_temp()[1]
                )
